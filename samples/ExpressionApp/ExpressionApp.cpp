@@ -115,7 +115,7 @@ int
     FLAG_viewMode           = 0xF,                // VIEW_MESH | VIEW_IMAGE | VIEW_PLOT | VIEW_LM
     FLAG_exprMode           = 2,                  // 1=mesh, 2=MLP
     FLAG_poseMode           = 0,
-    FLAG_cheekPuff          = 0,
+    FLAG_cheekPuff          = 1, // Set to true because command line args dont work?!
     FLAG_gaze               = 0;
 double
     FLAG_fov                = 0.0;                // Orthographic by default
@@ -541,6 +541,62 @@ const char *App::_sfmExprAbbr[][4] = {
   { "HAPPY",    NULL, NULL, NULL    },
   { "SAD",      NULL, NULL, NULL    },
   { "SURPRISE", NULL, NULL, NULL    },
+};
+
+const std::string blend_shape_names[53] = {
+  "browDown_L",
+  "browDown_R",
+  "browInnerUp_L",
+  "browInnerUp_R",
+  "browOuterUp_L",
+  "browOuterUp_R",
+  "cheekPuff_L",
+  "cheekPuff_R",
+  "cheekSquint_L",
+  "cheekSquint_R",
+  "eyeBlink_L",
+  "eyeBlink_R",
+  "eyeLookDown_L",
+  "eyeLookDown_R",
+  "eyeLookIn_L",
+  "eyeLookIn_R",
+  "eyeLookOut_L",
+  "eyeLookOut_R",
+  "eyeLookUp_L",
+  "eyeLookUp_R",
+  "eyeSquint_L",
+  "eyeSquint_R",
+  "eyeWide_L",
+  "eyeWide_R",
+  "jawForward",
+  "jawLeft",
+  "jawOpen",
+  "jawRight",
+  "mouthClose",
+  "mouthDimple_L",
+  "mouthDimple_R",
+  "mouthFrown_L",
+  "mouthFrown_R",
+  "mouthFunnel",
+  "mouthLeft",
+  "mouthLowerDown",
+  "mouthLowerDown",
+  "mouthPress_L",
+  "mouthPress_R",
+  "mouthPucker",
+  "mouthRight",
+  "mouthRollLower",
+  "mouthRollUpper",
+  "mouthShrugLowe",
+  "mouthShrugUppe",
+  "mouthSmile_L",
+  "mouthSmile_R",
+  "mouthStretch_L",
+  "mouthStretch_R",
+  "mouthUpperUp_L",
+  "mouthUpperUp_R",
+  "noseSneer_L",
+  "noseSneer_R",
 };
 
 NvCV_Status App::setInputVideo(const std::string& file) {
@@ -1051,6 +1107,13 @@ NvCV_Status App::run() {
     if (_viewMode & VIEW_MESH) {
       if (isFaceDetected) {
         float* head_translation = _poseMode == 1 ? &_pose.translation.vec[0] : nullptr;
+
+        std::cout << std::endl << "BLENDSHAPES:" << std::endl;
+        int i;
+        
+        for (int i = 0; i < _expressions.size(); ++i) {
+            std::cout << blend_shape_names[i] << ' ' << _expressions[i] << std::endl;
+        }
         BAIL_IF_ERR(err = _renderer->render(_expressions.data(), &_pose.rotation.x, head_translation, &_renderImg));   // GL _renderImg is upside down
         NvCVImage_InitView(&view, &_compImg, _renderX, _renderY, _renderWidth, _renderHeight);
         NvCVImage_FlipY(&view, &view);  // Since OpenGL renderImg is upside-down, we copy it to a flipped dst
